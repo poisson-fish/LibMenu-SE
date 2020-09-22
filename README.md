@@ -31,3 +31,10 @@ As the menu is stateful, you can navigate it with the functions defined by the M
 ```aMenu.Next(); // Moves the selection cursor down the list.```\
 ```aMenu.Back(); // Goes up a nest level.```\
 ```aMenu.Select(); // Selects a list item, calling its optionally defined action.```
+
+To get a string of the menus current state, use this:\
+```aMenu.RenderToString(); // Renders the menu to an easy string.```
+
+More documentation will follow, and I'll be working on this more to make it better in my free time.
+Feel free to add me on Discord, I am happy to help if you are having issues.\
+twin#4486
