@@ -161,7 +161,8 @@ namespace IngameScript
             }
             public void Back()
             {
-                Root.ChangePage(Parent);
+                if(Parent != null) //Are we already top level?
+                    Root.ChangePage(Parent);
             }
 
             public void UnhighlightAll()
