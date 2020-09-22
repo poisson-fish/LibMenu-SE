@@ -11,4 +11,8 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Menu.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" />
+  </ItemGroup>
 </Project>

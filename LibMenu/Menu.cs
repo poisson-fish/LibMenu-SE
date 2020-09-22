@@ -1,10 +1,29 @@
-﻿
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using System;
+﻿/*
+    LibMenu - A simple menu system for Space Engineers programmable blocks
+    Copyright (C) 2020  twin (udidwhy@gmail.com)
 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    LibMenu - Copyright (C) 2020  twin (udidwhy@gmail.com)
+    This program comes with ABSOLUTELY NO WARRANTY;
+    This is free software, and you are welcome to redistribute it
+    under certain conditions;
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IngameScript
 {
@@ -56,12 +75,10 @@ namespace IngameScript
             {
                 Root = root;
             }
-
         }
         public class MenuItemSingle : MenuItemBase
         {
-
-            public MenuItemSingle(string text,char selectionChar = '>')
+            public MenuItemSingle(string text, char selectionChar = '>')
             {
                 Text = text;
                 OnClick = null;
@@ -78,7 +95,6 @@ namespace IngameScript
             {
                 OnClick?.Invoke();
             }
-
         }
         public class MenuBackButton : MenuItemBase
         {
@@ -99,7 +115,6 @@ namespace IngameScript
             {
                 Parent?.Back();
             }
-
         }
         public class MenuPage : MenuItemBase
         {
@@ -107,12 +122,12 @@ namespace IngameScript
             private readonly string _separator;
             private int _selectionIndex;
 
-            public MenuPage(string title,List<MenuItemBase> items, char selectionChar = '>',char separator = '-', int separatorCount = 9)
+            public MenuPage(string title, List<MenuItemBase> items, char selectionChar = '>', char separator = '-', int separatorCount = 9)
             {
                 _items = items;
                 foreach (var item in _items) item.SetParent(this);
                 Text = title;
-                _separator = new string(separator,separatorCount);
+                _separator = new string(separator, separatorCount);
                 SelectionChar = selectionChar;
                 _selectionIndex = 0;
                 _items[_selectionIndex].HighlightThis();
@@ -128,7 +143,6 @@ namespace IngameScript
                 {
                     _items[_selectionIndex].Select();
                 }
-                
             }
 
             public void Previous()
@@ -150,7 +164,7 @@ namespace IngameScript
             {
                 foreach (var i in _items) i.UnhighlightThis();
             }
-            
+
             public string RenderPage()
             {
                 return Text + "\n" + _separator + "\n" + _items.Aggregate("", (current, item) => current + item.RenderToString()) + _separator;
@@ -160,44 +174,42 @@ namespace IngameScript
                 Root = root;
                 foreach (var item in _items) item.SetRoot(root);
             }
-
-
         }
         public class Menu
         {
-            private MenuPage Page;
+            private MenuPage _page;
             public Menu(MenuPage page)
             {
-                Page = page;
+                _page = page;
                 page.SetRoot(this);
             }
 
             public string RenderToString()
             {
-                return Page.RenderPage();
+                return _page.RenderPage();
             }
 
             public void ChangePage(MenuPage newPage)
             {
-                Page = newPage;
+                _page = newPage;
             }
             public void Previous()
             {
-                Page.Previous();
+                _page.Previous();
             }
             public void Next()
             {
-                Page.Next();
+                _page.Next();
             }
 
             public void Select()
             {
-                Page.Select();
+                _page.Select();
             }
 
             public void Back()
             {
-                Page.Back();
+                _page.Back();
             }
         }
     }
