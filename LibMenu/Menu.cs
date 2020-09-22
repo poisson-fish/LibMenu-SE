@@ -1,20 +1,10 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
+﻿
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using System.Text;
 using System;
-using Sandbox.Game.Gui;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ModAPI.Ingame.Utilities;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
-using VRageMath;
+
 
 namespace IngameScript
 {
@@ -36,20 +26,37 @@ namespace IngameScript
 
             public virtual void HighlightThis()
             {
-                foreach (var i in Parent.GetItems()) i.DehilightThis();
+                Parent.UnhighlightAll();
                 IsSelected = true;
             }
 
-            public virtual void DehilightThis()
+            public virtual void UnhighlightThis()
             {
                 IsSelected = false;
             }
 
             public virtual void Select()
             {
-                OnClick();
+                //Do nothing by default
             }
-        
+
+            public virtual Menu GetRoot()
+            {
+                return Root;
+            }
+            public virtual MenuItemBase GetParent()
+            {
+                return Parent;
+            }
+            public virtual void SetParent(MenuPage parent)
+            {
+                Parent = parent;
+            }
+            public virtual void SetRoot(Menu root)
+            {
+                Root = root;
+            }
+
         }
         public class MenuItemSingle : MenuItemBase
         {
@@ -67,64 +74,131 @@ namespace IngameScript
                 OnClick = onClickAction;
                 SelectionChar = selectionChar;
             }
+            public override void Select()
+            {
+                OnClick?.Invoke();
+            }
+
+        }
+        public class MenuBackButton : MenuItemBase
+        {
+            public MenuBackButton(char selectionChar = '>')
+            {
+                Text = "<-- Back";
+                OnClick = null;
+                SelectionChar = selectionChar;
+            }
+            public MenuBackButton(string text, char selectionChar = '>')
+            {
+                Text = text;
+                OnClick = null;
+                SelectionChar = selectionChar;
+            }
+
+            public override void Select()
+            {
+                Parent?.Back();
+            }
 
         }
         public class MenuPage : MenuItemBase
         {
             private readonly List<MenuItemBase> _items;
             private readonly string _separator;
-            protected int SelectionIndex;
+            private int _selectionIndex;
 
-            public MenuPage(MenuPage parent,string title,List<MenuItemBase> items, char selectionChar = '>',char separator = '-')
+            public MenuPage(string title,List<MenuItemBase> items, char selectionChar = '>',char separator = '-', int separatorCount = 9)
             {
-                Parent = parent;
-                Text = title;
                 _items = items;
-                _separator = new string(separator,8);
+                foreach (var item in _items) item.SetParent(this);
+                Text = title;
+                _separator = new string(separator,separatorCount);
                 SelectionChar = selectionChar;
+                _selectionIndex = 0;
+                _items[_selectionIndex].HighlightThis();
             }
             public override void Select()
             {
-                Root.ChangePage(this);
+                var item = _items[_selectionIndex];
+                if (item is MenuPage)
+                {
+                    Root.ChangePage(_items[_selectionIndex] as MenuPage);
+                }
+                else
+                {
+                    _items[_selectionIndex].Select();
+                }
+                
             }
 
+            public void Previous()
+            {
+                _selectionIndex = (_selectionIndex - 1) % _items.Count;
+                _items[_selectionIndex].HighlightThis();
+            }
+            public void Next()
+            {
+                _selectionIndex = (_selectionIndex + 1) % _items.Count;
+                _items[_selectionIndex].HighlightThis();
+            }
             public void Back()
             {
                 Root.ChangePage(Parent);
             }
+
+            public void UnhighlightAll()
+            {
+                foreach (var i in _items) i.UnhighlightThis();
+            }
+            
             public string RenderPage()
             {
                 return Text + "\n" + _separator + "\n" + _items.Aggregate("", (current, item) => current + item.RenderToString()) + _separator;
             }
-
-            public List<MenuItemBase> GetItems()
+            public override void SetRoot(Menu root)
             {
-                return _items;
+                Root = root;
+                foreach (var item in _items) item.SetRoot(root);
             }
+
+
         }
-        public class Menu : MenuPage
+        public class Menu
         {
             private MenuPage Page;
-            private bool IsDirty;
-            public Menu(string text,MenuPage page)
+            public Menu(MenuPage page)
             {
-                Text = text;
                 Page = page;
-                SelectionIndex = selectionIndex;
+                page.SetRoot(this);
             }
 
-            public override string RenderToString()
+            public string RenderToString()
             {
                 return Page.RenderPage();
             }
 
-            public void ChangePage(MenuPage NewPage)
+            public void ChangePage(MenuPage newPage)
             {
-                Page = NewPage;
-                IsDirty = true;
+                Page = newPage;
+            }
+            public void Previous()
+            {
+                Page.Previous();
+            }
+            public void Next()
+            {
+                Page.Next();
             }
 
-            
+            public void Select()
+            {
+                Page.Select();
+            }
+
+            public void Back()
+            {
+                Page.Back();
+            }
         }
     }
 }
