@@ -17,7 +17,7 @@ var mainMenuPage = new MenuPage("Main Menu", new List<MenuItemBase>(){
                     {
                         new MenuItemSingle("Deep Nested Option 1"),
                         new MenuItemSingle("Deep Nested Option 2"),
-                        new MenuItemSingle("Deep Nested Option with Action 3",(Action)(() => System.Diagnostics.Debug.WriteLine("I was clicked!"))),
+                        new MenuItemSingle("Deep Nested Option with Action 3",(Action)(() => Echo("I was clicked!"))),
                         new MenuBackButton()
                     }),
                     new MenuBackButton()
