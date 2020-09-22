@@ -126,7 +126,7 @@ namespace IngameScript
             private readonly string _separator;
             private int _selectionIndex;
 
-            public MenuPage(string title, List<MenuItemBase> items, char selectionChar = '>', char separator = '-', int separatorCount = 9)
+            public MenuPage(string title, List<MenuItemBase> items, char selectionChar = '>', char separator = '-', int separatorCount = 15)
             {
                 _items = items;
                 foreach (var item in _items) item.SetParent(this);
@@ -182,38 +182,53 @@ namespace IngameScript
         public class Menu
         {
             private MenuPage _page;
+            private bool _isDirty;
+            private string _stateCache;
             public Menu(MenuPage page)
             {
                 _page = page;
                 page.SetRoot(this);
+                _stateCache = _page.RenderPage();
+                _isDirty = false;
             }
 
             public string RenderToString()
             {
-                return _page.RenderPage();
+                if (_isDirty)
+                {
+                    _isDirty = false;
+                    _stateCache = _page.RenderPage();
+                }
+
+                return _stateCache;
             }
 
             public void ChangePage(MenuPage newPage)
             {
                 _page = newPage;
+                _isDirty = true;
             }
             public void Previous()
             {
                 _page.Previous();
+                _isDirty = true;
             }
             public void Next()
             {
                 _page.Next();
+                _isDirty = true;
             }
 
             public void Select()
             {
                 _page.Select();
+                _isDirty = true;
             }
 
             public void Back()
             {
                 _page.Back();
+                _isDirty = true;
             }
         }
     }
