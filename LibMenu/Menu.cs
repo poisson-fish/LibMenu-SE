@@ -29,6 +29,10 @@ namespace IngameScript
 {
     partial class Program
     {
+        public static int WrapValue(int x, int xMin, int xMax)
+        {
+            return (((x - xMin) % (xMax - xMin)) + (xMax - xMin)) % (xMax - xMin) + xMin;
+        }
         public abstract class MenuItemBase
         {
             protected string Text;
@@ -147,12 +151,12 @@ namespace IngameScript
 
             public void Previous()
             {
-                _selectionIndex = (_selectionIndex - 1) % _items.Count;
+                _selectionIndex = WrapValue(_selectionIndex - 1,0,_items.Count);
                 _items[_selectionIndex].HighlightThis();
             }
             public void Next()
             {
-                _selectionIndex = (_selectionIndex + 1) % _items.Count;
+                _selectionIndex = WrapValue(_selectionIndex + 1, 0, _items.Count);
                 _items[_selectionIndex].HighlightThis();
             }
             public void Back()
