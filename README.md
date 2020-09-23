@@ -7,6 +7,10 @@ Clone this repo and add it to your MDK script solution, as well as a reference t
 After you've added the reference to LibMenu you can define menu structures progammatically as follows.
 
 ```
+public void OptionAction(MenuItemBase menuItem)
+{
+    menuItem?.SetText("I was clicked!");
+}
 var mainMenuPage = new MenuPage("Main Menu", new List<MenuItemBase>(){
                 new MenuItemSingle("Option 1"),
                 new MenuItemSingle("Option 2"),
@@ -17,7 +21,7 @@ var mainMenuPage = new MenuPage("Main Menu", new List<MenuItemBase>(){
                     {
                         new MenuItemSingle("Deep Nested Option 1"),
                         new MenuItemSingle("Deep Nested Option 2"),
-                        new MenuItemSingle("Deep Nested Option with Action 3",(Action)(() => Echo("I was clicked!"))),
+                        new MenuItemSingle("Deep Nested Option with Delegate 3",OptionAction),
                         new MenuBackButton()
                     }),
                     new MenuBackButton()
