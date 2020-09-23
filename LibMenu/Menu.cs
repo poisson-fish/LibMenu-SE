@@ -29,6 +29,8 @@ namespace IngameScript
 {
     partial class Program
     {
+        public delegate void MenuItemAction(MenuItemBase b);
+
         public static int WrapValue(int x, int xMin, int xMax)
         {
             return (((x - xMin) % (xMax - xMin)) + (xMax - xMin)) % (xMax - xMin) + xMin;
@@ -36,12 +38,16 @@ namespace IngameScript
         public abstract class MenuItemBase
         {
             protected string Text;
-            protected Action OnClick;
             protected bool IsSelected;
             protected char SelectionChar;
             protected MenuPage Parent;
             protected Menu Root;
+            public MenuItemAction SelectAction;
 
+            public MenuItemBase()
+            {
+                SelectAction = new MenuItemAction(DefaultAction);
+            }
             public virtual string RenderToString()
             {
                 return (IsSelected ? SelectionChar.ToString() : "") + Text + "\n";
@@ -60,7 +66,7 @@ namespace IngameScript
 
             public virtual void Select()
             {
-                //Do nothing by default
+                SelectAction?.Invoke(this);
             }
 
             public virtual Menu GetRoot()
@@ -79,39 +85,44 @@ namespace IngameScript
             {
                 Root = root;
             }
+            public void SetText(string text)
+            {
+                Text = text;
+                Root?.MarkDirty();
+            }
+            public virtual void DefaultAction(MenuItemBase b)
+            {
+                //Do nothing
+            }
         }
         public class MenuItemSingle : MenuItemBase
         {
             public MenuItemSingle(string text, char selectionChar = '>')
             {
                 Text = text;
-                OnClick = null;
+                SelectAction = new MenuItemAction(DefaultAction);
                 SelectionChar = selectionChar;
             }
 
-            public MenuItemSingle(string text, Action onClickAction, char selectionChar = '>')
+            public MenuItemSingle(string text, MenuItemAction onClickAction, char selectionChar = '>')
             {
                 Text = text;
-                OnClick = onClickAction;
+                SelectAction = new MenuItemAction(onClickAction);
                 SelectionChar = selectionChar;
             }
-            public override void Select()
-            {
-                OnClick?.Invoke();
-            }
+
         }
         public class MenuBackButton : MenuItemBase
         {
             public MenuBackButton(char selectionChar = '>')
             {
                 Text = "<-- Back";
-                OnClick = null;
                 SelectionChar = selectionChar;
             }
             public MenuBackButton(string text, char selectionChar = '>')
             {
                 Text = text;
-                OnClick = null;
+
                 SelectionChar = selectionChar;
             }
 
@@ -193,6 +204,10 @@ namespace IngameScript
                 _isDirty = false;
             }
 
+            public void MarkDirty()
+            {
+                _isDirty = true;
+            }
             public string RenderToString()
             {
                 if (_isDirty)
